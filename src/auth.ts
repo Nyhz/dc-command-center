@@ -36,6 +36,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   callbacks: {
+    authorized({ auth, request }) {
+      const isLoggedIn = !!auth?.user;
+      const isProtected = ["/dashboard", "/roster", "/wishlist", "/calendar", "/logs"].some(
+        (path) => request.nextUrl.pathname.startsWith(path)
+      );
+
+      if (isProtected && !isLoggedIn) {
+        return Response.redirect(new URL("/login", request.nextUrl.origin));
+      }
+
+      return true;
+    },
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;

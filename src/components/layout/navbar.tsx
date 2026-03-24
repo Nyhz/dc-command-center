@@ -64,7 +64,15 @@ export function Navbar() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          {session ? <UserAvatar /> : null}
+          {session ? (
+            <UserAvatar />
+          ) : (
+            <Link href="/login">
+              <Button size="sm" variant="outline" className="font-heading tracking-wide">
+                Sign In
+              </Button>
+            </Link>
+          )}
           <Button
             variant="ghost"
             size="icon"
