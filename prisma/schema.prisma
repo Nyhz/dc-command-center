@@ -85,7 +85,7 @@ model Character {
   id         String   @id @default(cuid())
   name       String
   realm      String
-  region     String   @default("us")
+  region     String   @default("eu")
   className  String
   specName   String?
   raidRole   RaidRole @default(DPS)

@@ -29,6 +29,7 @@ export function AddCharacterDialog() {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [realm, setRealm] = useState("");
+  const [region, setRegion] = useState("eu");
   const [className, setClassName] = useState("");
   const [specName, setSpecName] = useState("");
   const [raidRole, setRaidRole] = useState("DPS");
@@ -46,6 +47,7 @@ export function AddCharacterDialog() {
       body: JSON.stringify({
         name,
         realm: realm.toLowerCase().replace(/ /g, "-"),
+        region,
         className,
         specName: specName || null,
         raidRole,
@@ -81,7 +83,7 @@ export function AddCharacterDialog() {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="char-name">Character Name</Label>
               <Input
@@ -97,9 +99,21 @@ export function AddCharacterDialog() {
                 id="char-realm"
                 value={realm}
                 onChange={(e) => setRealm(e.target.value)}
-                placeholder="e.g. Area 52"
+                placeholder="e.g. Sanguino"
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Region</Label>
+              <Select value={region} onValueChange={(v) => v && setRegion(v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="eu">EU</SelectItem>
+                  <SelectItem value="us">US</SelectItem>
+                  <SelectItem value="kr">KR</SelectItem>
+                  <SelectItem value="tw">TW</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
