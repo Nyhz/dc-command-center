@@ -30,7 +30,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       issuer: process.env.BATTLENET_ISSUER as BattleNetIssuer,
       clientId: process.env.BATTLENET_CLIENT_ID,
       clientSecret: process.env.BATTLENET_CLIENT_SECRET,
-      checks: ["state"],
+      checks: ["state", "nonce"],
     }),
   ],
   pages: {
