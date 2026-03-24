@@ -21,7 +21,9 @@ import {
 import { ClassIcon } from "@/components/shared/class-icon";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { CLASS_COLORS, WOW_CLASSES } from "@/lib/constants";
-import { ArrowUpDown, Search } from "lucide-react";
+import { ArrowUpDown, Search, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface RosterCharacter {
   id: string;
@@ -37,7 +39,8 @@ interface RosterCharacter {
 
 type SortKey = "name" | "className" | "raidRole" | "itemLevel";
 
-export function RosterTable({ characters }: { characters: RosterCharacter[] }) {
+export function RosterTable({ characters, canManage = false }: { characters: RosterCharacter[]; canManage?: boolean }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState<string>("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -161,12 +164,13 @@ export function RosterTable({ characters }: { characters: RosterCharacter[] }) {
                 </span>
               </TableHead>
               <TableHead>Player</TableHead>
+              {canManage && <TableHead className="w-10" />}
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={canManage ? 7 : 6} className="h-24 text-center text-muted-foreground">
                   No characters found.
                 </TableCell>
               </TableRow>
@@ -204,6 +208,23 @@ export function RosterTable({ characters }: { characters: RosterCharacter[] }) {
                   <TableCell className="text-muted-foreground">
                     {char.user?.battleTag ?? char.user?.name ?? "—"}
                   </TableCell>
+                  {canManage && (
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          if (!confirm(`Remove ${char.name} from the roster?`)) return;
+                          await fetch(`/api/roster/${char.id}`, { method: "DELETE" });
+                          router.refresh();
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}

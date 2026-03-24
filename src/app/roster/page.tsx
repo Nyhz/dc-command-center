@@ -35,7 +35,7 @@ export default async function RosterPage() {
         )}
       </div>
 
-      <RosterTable characters={characters} />
+      <RosterTable characters={characters} canManage={canManage} />
     </div>
   );
 }
