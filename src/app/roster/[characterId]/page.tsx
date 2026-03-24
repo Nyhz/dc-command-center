@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+import { isOwner, isRaidLeader } from "@/lib/auth-helpers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +11,7 @@ import { RoleBadge } from "@/components/shared/role-badge";
 import { CLASS_COLORS } from "@/lib/constants";
 import { Scroll, BarChart3, CalendarDays, Sword } from "lucide-react";
 import { GearDisplay } from "@/components/roster/gear-display";
+import { AddItemDialog } from "@/components/wishlist/add-item-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +21,12 @@ export default async function CharacterDetailPage({
   params: Promise<{ characterId: string }>;
 }) {
   const { characterId } = await params;
+  const session = await auth();
 
   const character = await prisma.character.findUnique({
     where: { id: characterId },
     include: {
-      user: { select: { name: true, battleTag: true } },
+      user: { select: { id: true, name: true, battleTag: true } },
       wishlistItems: { where: { obtained: false }, orderBy: { priority: "asc" }, take: 5 },
       performances: {
         orderBy: { createdAt: "desc" },
@@ -39,6 +43,9 @@ export default async function CharacterDetailPage({
 
   if (!character) notFound();
 
+  const canEditWishlist = session
+    ? isOwner(session, character.userId) || isRaidLeader(session)
+    : false;
   const classColor = CLASS_COLORS[character.className] ?? "#FFFFFF";
 
   return (
@@ -88,10 +95,15 @@ export default async function CharacterDetailPage({
         </TabsContent>
 
         <TabsContent value="wishlist" className="mt-4">
+          {canEditWishlist && (
+            <div className="mb-4 flex justify-end">
+              <AddItemDialog characterId={characterId} />
+            </div>
+          )}
           {character.wishlistItems.length === 0 ? (
             <Card>
               <CardContent className="flex h-24 items-center justify-center text-muted-foreground">
-                No active wishlist items.
+                No active wishlist items.{canEditWishlist ? " Click \"Add Item\" to get started." : ""}
               </CardContent>
             </Card>
           ) : (
