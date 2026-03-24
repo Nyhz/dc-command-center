@@ -43,9 +43,11 @@ export default function HomePage() {
         </p>
 
         <div className="flex gap-4">
-          <Button asChild size="lg" className="font-heading tracking-wide">
-            <Link href="/dashboard">Enter Command Center</Link>
-          </Button>
+          <Link href="/dashboard">
+            <Button size="lg" className="font-heading tracking-wide">
+              Enter Command Center
+            </Button>
+          </Link>
         </div>
       </section>
 

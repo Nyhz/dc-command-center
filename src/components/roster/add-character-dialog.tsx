@@ -69,11 +69,9 @@ export function AddCharacterDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Character
-        </Button>
+      <DialogTrigger render={<Button size="sm" className="gap-2" />}>
+        <Plus className="h-4 w-4" />
+        Add Character
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
