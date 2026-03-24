@@ -17,7 +17,10 @@ export default async function LogsPage() {
   const logs = await prisma.raidLog.findMany({
     include: {
       raidEvent: { select: { id: true, title: true } },
-      _count: { select: { performances: true } },
+      performances: {
+        select: { encounterId: true, difficulty: true },
+        distinct: ["encounterId", "difficulty"],
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -65,7 +68,7 @@ export default async function LogsPage() {
                         {log.startTime && (
                           <span>{format(new Date(log.startTime), "MMM d, yyyy")}</span>
                         )}
-                        <span>{log._count.performances} performances recorded</span>
+                        <span>{log.performances.length} boss kills</span>
                         {!log.fetchedAt && (
                           <Badge variant="outline" className="text-xs text-yellow-400 border-yellow-400/30">
                             Not fetched

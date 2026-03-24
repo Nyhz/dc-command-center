@@ -62,7 +62,7 @@ export default async function LogDetailPage({
           {log.startTime && log.endTime && (
             <> &middot; {format(new Date(log.startTime), "h:mm a")} - {format(new Date(log.endTime), "h:mm a")}</>
           )}
-          <span> &middot; {log.performances.length} performance records</span>
+          <span> &middot; {new Set(log.performances.map((p) => `${p.encounterId}-${p.difficulty}`)).size} boss kills</span>
         </p>
       </div>
 
