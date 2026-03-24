@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+import { isRaidLeader } from "@/lib/auth-helpers";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import { RefetchButton } from "@/components/logs/refetch-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,6 +42,8 @@ export default async function LogDetailPage({
   params: Promise<{ reportCode: string }>;
 }) {
   const { reportCode } = await params;
+  const session = await auth();
+  const canManage = isRaidLeader(session);
 
   const log = await prisma.raidLog.findUnique({
     where: { reportCode },
@@ -88,6 +93,7 @@ export default async function LogDetailPage({
           >
             <ExternalLink className="h-4 w-4" />
           </a>
+          {canManage && <RefetchButton reportCode={reportCode} />}
         </div>
         <p className="text-muted-foreground">
           {log.startTime && format(new Date(log.startTime), "EEEE, MMM d, yyyy")}
