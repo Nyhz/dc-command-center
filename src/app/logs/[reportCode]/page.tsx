@@ -31,6 +31,8 @@ function formatNumber(n: number | null): string {
   return n.toFixed(1);
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function LogDetailPage({
   params,
 }: {

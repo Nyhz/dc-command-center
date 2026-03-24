@@ -4,6 +4,8 @@ import { isRaidLeader } from "@/lib/auth-helpers";
 import { RosterTable } from "@/components/roster/roster-table";
 import { AddCharacterDialog } from "@/components/roster/add-character-dialog";
 
+export const dynamic = "force-dynamic";
+
 export default async function RosterPage() {
   const session = await auth();
   const characters = await prisma.character.findMany({

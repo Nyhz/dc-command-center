@@ -82,7 +82,7 @@ export function CreateEventDialog() {
             </div>
             <div className="space-y-2">
               <Label>Difficulty</Label>
-              <Select value={difficulty} onValueChange={setDifficulty}>
+              <Select value={difficulty} onValueChange={(v) => v && setDifficulty(v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {DIFFICULTIES.map((d) => (

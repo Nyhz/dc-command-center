@@ -3,6 +3,8 @@ import { isRaidLeader } from "@/lib/auth-helpers";
 import { RaidCalendar } from "@/components/calendar/raid-calendar";
 import { CreateEventDialog } from "@/components/calendar/create-event-dialog";
 
+export const dynamic = "force-dynamic";
+
 export default async function CalendarPage() {
   const session = await auth();
   const canManage = isRaidLeader(session);

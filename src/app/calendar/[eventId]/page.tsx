@@ -10,6 +10,8 @@ import { ClassIcon } from "@/components/shared/class-icon";
 import { CLASS_COLORS } from "@/lib/constants";
 import { AttendanceToggle } from "@/components/calendar/attendance-toggle";
 
+export const dynamic = "force-dynamic";
+
 export default async function EventDetailPage({
   params,
 }: {

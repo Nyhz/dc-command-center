@@ -106,7 +106,7 @@ export function AddCharacterDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Class</Label>
-              <Select value={className} onValueChange={(v) => { setClassName(v); setSpecName(""); }}>
+              <Select value={className} onValueChange={(v) => { if (v) { setClassName(v); setSpecName(""); } }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select class" />
                 </SelectTrigger>
@@ -119,7 +119,7 @@ export function AddCharacterDialog() {
             </div>
             <div className="space-y-2">
               <Label>Spec</Label>
-              <Select value={specName} onValueChange={setSpecName} disabled={!className}>
+              <Select value={specName} onValueChange={(v) => v && setSpecName(v)} disabled={!className}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select spec" />
                 </SelectTrigger>
@@ -135,7 +135,7 @@ export function AddCharacterDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Raid Role</Label>
-              <Select value={raidRole} onValueChange={setRaidRole}>
+              <Select value={raidRole} onValueChange={(v) => v && setRaidRole(v)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

@@ -9,6 +9,8 @@ import { RoleBadge } from "@/components/shared/role-badge";
 import { CLASS_COLORS } from "@/lib/constants";
 import { Scroll, BarChart3, CalendarDays } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function CharacterDetailPage({
   params,
 }: {

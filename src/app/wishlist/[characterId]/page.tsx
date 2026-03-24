@@ -15,6 +15,8 @@ const priorityLabels: Record<number, { label: string; className: string }> = {
   3: { label: "Minor", className: "bg-gray-600/20 text-gray-400 border-gray-600/30" },
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function CharacterWishlistPage({
   params,
 }: {

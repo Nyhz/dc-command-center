@@ -111,7 +111,7 @@ export function AddItemDialog({ characterId }: { characterId: string }) {
             </div>
             <div className="space-y-2">
               <Label>Priority</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select value={priority} onValueChange={(v) => v && setPriority(v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1">BiS</SelectItem>

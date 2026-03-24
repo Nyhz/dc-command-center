@@ -3,7 +3,22 @@
     "allow": [
       "Bash(pnpm create:*)",
       "Bash(printf \"No\\\\nYes\\\\n\")",
-      "Bash(yes)"
+      "Bash(yes)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(ls -la /c/dev/wow-command-center/node_modules/.pnpm/@auth+core*/node_modules/@auth/core/providers/)",
+      "Bash(find /c/dev/wow-command-center/node_modules/.pnpm/@auth+core*/node_modules/@auth/core/providers -name \"index*\")",
+      "Bash(xargs cat:*)",
+      "Bash(xargs grep:*)",
+      "Bash(find /c/dev/wow-command-center -name README* -o -name *.md)",
+      "Bash(find /c/dev/wow-command-center -name .env*)",
+      "Bash(cat node_modules/.pnpm/@prisma+client*/node_modules/@prisma/client/default.d.ts)",
+      "Bash(grep -r 'class PrismaClient' node_modules/.pnpm/.prisma+client@*/node_modules/.prisma/client/)",
+      "Bash(find node_modules -path */.prisma/client/default.d.ts)",
+      "Bash(pnpm add:*)",
+      "WebSearch",
+      "WebFetch(domain:neon.tech)",
+      "WebFetch(domain:neon.com)",
+      "Bash(git add:*)"
     ]
   }
 }

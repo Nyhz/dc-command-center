@@ -97,7 +97,7 @@ export function RosterTable({ characters }: { characters: RosterCharacter[] }) {
             className="pl-9"
           />
         </div>
-        <Select value={classFilter} onValueChange={setClassFilter}>
+        <Select value={classFilter} onValueChange={(v) => v && setClassFilter(v)}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="All Classes" />
           </SelectTrigger>
@@ -110,7 +110,7 @@ export function RosterTable({ characters }: { characters: RosterCharacter[] }) {
             ))}
           </SelectContent>
         </Select>
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
+        <Select value={roleFilter} onValueChange={(v) => v && setRoleFilter(v)}>
           <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>

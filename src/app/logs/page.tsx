@@ -8,6 +8,8 @@ import { LinkLogDialog } from "@/components/logs/link-log-dialog";
 import Link from "next/link";
 import { ExternalLink, BarChart3 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function LogsPage() {
   const session = await auth();
   const canManage = isRaidLeader(session);
