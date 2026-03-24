@@ -1,3 +1,4 @@
+import Script from "next/script";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Cinzel } from "next/font/google";
@@ -45,6 +46,13 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
           </TooltipProvider>
         </Providers>
+        <Script id="wowhead-config" strategy="lazyOnload">
+          {`const whTooltips = { colorLinks: true, iconizeLinks: true, renameLinks: false, iconSize: "small" };`}
+        </Script>
+        <Script
+          src="https://wow.zamimg.com/js/tooltips.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

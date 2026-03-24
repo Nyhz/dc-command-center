@@ -110,6 +110,32 @@ export async function fetchCharacterProfile(
   return response.json();
 }
 
+export interface BlizzardCharacterMedia {
+  assets: { key: string; value: string }[];
+}
+
+export async function fetchCharacterMedia(
+  realmSlug: string,
+  characterName: string,
+  region: string = "eu"
+): Promise<BlizzardCharacterMedia> {
+  const token = await getBlizzardToken();
+  const encodedName = encodeURIComponent(characterName.toLowerCase());
+
+  const response = await fetch(
+    `https://${region}.api.blizzard.com/profile/wow/character/${realmSlug}/${encodedName}/character-media?namespace=profile-${region}&locale=en_US`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch character media: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export interface BlizzardEquippedItem {
   slot: { type: string; name: string };
   item: { id: number; name: string };

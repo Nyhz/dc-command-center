@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { fetchCharacterEquipment } from "@/lib/blizzard";
+import { fetchCharacterEquipment, fetchCharacterMedia } from "@/lib/blizzard";
 
 export async function GET(
   _request: Request,
@@ -24,12 +24,23 @@ export async function GET(
   }
 
   try {
-    const equipment = await fetchCharacterEquipment(
-      character.realm,
-      character.name,
-      character.region
-    );
-    return NextResponse.json(equipment);
+    const [equipment, media] = await Promise.allSettled([
+      fetchCharacterEquipment(character.realm, character.name, character.region),
+      fetchCharacterMedia(character.realm, character.name, character.region),
+    ]);
+
+    const equippedItems =
+      equipment.status === "fulfilled" ? equipment.value.equipped_items : [];
+
+    let renderUrl: string | null = null;
+    if (media.status === "fulfilled") {
+      const mainRender = media.value.assets?.find(
+        (a) => a.key === "main" || a.key === "main-raw"
+      );
+      renderUrl = mainRender?.value ?? null;
+    }
+
+    return NextResponse.json({ equipped_items: equippedItems, renderUrl });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 502 });
