@@ -192,5 +192,5 @@ model Performance {
   character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   raidLog   RaidLog   @relation(fields: [raidLogId], references: [id], onDelete: Cascade)
 
-  @@unique([characterId, raidLogId, encounterId])
+  @@unique([characterId, raidLogId, encounterId, difficulty])
 }

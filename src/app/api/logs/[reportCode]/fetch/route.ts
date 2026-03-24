@@ -124,15 +124,15 @@ export async function POST(
 
       await prisma.performance.upsert({
         where: {
-          characterId_raidLogId_encounterId: {
+          characterId_raidLogId_encounterId_difficulty: {
             characterId: dbChar.id,
             raidLogId: log.id,
             encounterId: fight.encounterID,
+            difficulty: fight.difficulty,
           },
         },
         update: {
           encounterName: fight.name,
-          difficulty: fight.difficulty,
           dps: data.dps,
           hps: data.hps,
           deaths: 0,
