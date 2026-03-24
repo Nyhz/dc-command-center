@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { isRaidLeader } from "@/lib/auth-helpers";
 import { RosterTable } from "@/components/roster/roster-table";
 import { AddCharacterDialog } from "@/components/roster/add-character-dialog";
+import { SyncRosterDialog } from "@/components/roster/sync-roster-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,12 @@ export default async function RosterPage() {
             All guild members and their characters
           </p>
         </div>
-        {canManage && <AddCharacterDialog />}
+        {canManage && (
+          <div className="flex gap-2">
+            <SyncRosterDialog />
+            <AddCharacterDialog />
+          </div>
+        )}
       </div>
 
       <RosterTable characters={characters} />
