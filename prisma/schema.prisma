@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Auth.js v5 required models ───
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Application models ───
+
+enum GuildRole {
+  GUILD_MASTER
+  RAID_LEADER
+  OFFICER
+  MEMBER
+}
+
+enum RaidRole {
+  TANK
+  HEALER
+  DPS
+}
+
+enum AttendanceStatus {
+  ATTENDING
+  ABSENT
+  TENTATIVE
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  battleTag     String?   @unique
+  guildRole     GuildRole @default(MEMBER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts   Account[]
+  sessions   Session[]
+  characters Character[]
+}
+
+model Character {
+  id         String   @id @default(cuid())
+  name       String
+  realm      String
+  region     String   @default("us")
+  className  String
+  specName   String?
+  raidRole   RaidRole @default(DPS)
+  itemLevel  Int      @default(0)
+  guildRank  Int      @default(0)
+  avatarUrl  String?
+  isMain     Boolean  @default(false)
+  blizzardId Int?
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wishlistItems WishlistItem[]
+  attendances   Attendance[]
+  performances  Performance[]
+
+  @@unique([name, realm, region])
+}
+
+model WishlistItem {
+  id          String   @id @default(cuid())
+  itemId      Int
+  itemName    String
+  itemIcon    String?
+  itemSlot    String?
+  itemLevel   Int?
+  sourceBoss  String?
+  sourceRaid  String?
+  priority    Int      @default(0)
+  note        String?  @db.Text
+  obtained    Boolean  @default(false)
+  characterId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, itemId])
+}
+
+model RaidEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  raidName    String
+  difficulty  String   @default("Heroic")
+  startTime   DateTime
+  endTime     DateTime
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  attendances Attendance[]
+  raidLogs    RaidLog[]
+}
+
+model Attendance {
+  id          String           @id @default(cuid())
+  status      AttendanceStatus @default(TENTATIVE)
+  note        String?
+  characterId String
+  raidEventId String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  raidEvent RaidEvent @relation(fields: [raidEventId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, raidEventId])
+}
+
+model RaidLog {
+  id          String    @id @default(cuid())
+  reportCode  String    @unique
+  title       String?
+  raidName    String?
+  startTime   DateTime?
+  endTime     DateTime?
+  raidEventId String?
+  fetchedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  raidEvent    RaidEvent?    @relation(fields: [raidEventId], references: [id], onDelete: SetNull)
+  performances Performance[]
+}
+
+model Performance {
+  id            String   @id @default(cuid())
+  characterId   String
+  raidLogId     String
+  encounterName String
+  encounterId   Int
+  difficulty    Int
+  dps           Float?
+  hps           Float?
+  deaths        Int      @default(0)
+  rankPercent   Float?
+  duration      Int?
+  spec          String?
+  createdAt     DateTime @default(now())
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  raidLog   RaidLog   @relation(fields: [raidLogId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, raidLogId, encounterId])
+}
