@@ -11,10 +11,30 @@ interface EquippedItem {
   name: string;
   quality: { type: string; name: string };
   level: { value: number };
-  enchantments?: { display_string: string }[];
+  enchantments?: { enchantment_id?: number; display_string: string }[];
   sockets?: { item?: { id: number; name: string }; display_string: string }[];
   set?: { item_set: { name: string } };
+  bonus_list?: number[];
   media?: { id: number };
+}
+
+function buildWowheadData(item: EquippedItem): string {
+  const parts = [`item=${item.item.id}`, `ilvl=${item.level.value}`];
+  if (item.enchantments?.length) {
+    const enchId = item.enchantments[0]?.enchantment_id;
+    if (enchId) parts.push(`ench=${enchId}`);
+  }
+  if (item.sockets?.length) {
+    const gemIds = item.sockets
+      .map((s) => s.item?.id)
+      .filter(Boolean)
+      .join(":");
+    if (gemIds) parts.push(`gems=${gemIds}`);
+  }
+  if (item.bonus_list?.length) {
+    parts.push(`bonus=${item.bonus_list.join(":")}`);
+  }
+  return parts.join("&");
 }
 
 const qualityColors: Record<string, string> = {
@@ -49,7 +69,7 @@ function GearSlot({ item, side }: { item: EquippedItem | undefined; side: "left"
       className={`flex items-center gap-2 py-1.5 px-2 rounded hover:bg-white/5 transition-colors group ${
         side === "right" ? "flex-row-reverse text-right" : ""
       } ${isBottom ? "justify-center" : ""}`}
-      data-wowhead={`item=${item.item.id}`}
+      data-wowhead={buildWowheadData(item)}
     >
       <div className="shrink-0 w-9 h-9 rounded border border-white/10 bg-black/40 flex items-center justify-center overflow-hidden">
         <span className="text-[10px] text-muted-foreground">{item.slot.name.slice(0, 4)}</span>

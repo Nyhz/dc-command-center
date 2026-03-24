@@ -142,9 +142,10 @@ export interface BlizzardEquippedItem {
   name: string;
   quality: { type: string; name: string };
   level: { value: number };
-  enchantments?: { display_string: string }[];
+  enchantments?: { enchantment_id?: number; display_string: string }[];
   sockets?: { item?: { id: number; name: string }; display_string: string }[];
   set?: { item_set: { name: string } };
+  bonus_list?: number[];
   transmog?: { item: { name: string } };
 }
 
