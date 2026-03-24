@@ -110,6 +110,44 @@ export async function fetchCharacterProfile(
   return response.json();
 }
 
+export interface BlizzardEquippedItem {
+  slot: { type: string; name: string };
+  item: { id: number; name: string };
+  name: string;
+  quality: { type: string; name: string };
+  level: { value: number };
+  enchantments?: { display_string: string }[];
+  sockets?: { item?: { id: number; name: string }; display_string: string }[];
+  set?: { item_set: { name: string } };
+  transmog?: { item: { name: string } };
+}
+
+export interface BlizzardEquipmentResponse {
+  equipped_items: BlizzardEquippedItem[];
+}
+
+export async function fetchCharacterEquipment(
+  realmSlug: string,
+  characterName: string,
+  region: string = "eu"
+): Promise<BlizzardEquipmentResponse> {
+  const token = await getBlizzardToken();
+  const encodedName = encodeURIComponent(characterName.toLowerCase());
+
+  const response = await fetch(
+    `https://${region}.api.blizzard.com/profile/wow/character/${realmSlug}/${encodedName}/equipment?namespace=profile-${region}&locale=en_US`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch character equipment: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export async function searchItems(
   query: string,
   region: string = "us"

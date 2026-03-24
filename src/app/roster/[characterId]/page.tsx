@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClassIcon } from "@/components/shared/class-icon";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { CLASS_COLORS } from "@/lib/constants";
-import { Scroll, BarChart3, CalendarDays } from "lucide-react";
+import { Scroll, BarChart3, CalendarDays, Sword } from "lucide-react";
+import { GearDisplay } from "@/components/roster/gear-display";
 
 export const dynamic = "force-dynamic";
 
@@ -66,8 +67,11 @@ export default async function CharacterDetailPage({
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="wishlist">
+      <Tabs defaultValue="gear">
         <TabsList>
+          <TabsTrigger value="gear" className="gap-1">
+            <Sword className="h-3 w-3" /> Gear
+          </TabsTrigger>
           <TabsTrigger value="wishlist" className="gap-1">
             <Scroll className="h-3 w-3" /> Wishlist
           </TabsTrigger>
@@ -78,6 +82,10 @@ export default async function CharacterDetailPage({
             <CalendarDays className="h-3 w-3" /> Attendance
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="gear" className="mt-4">
+          <GearDisplay characterId={characterId} />
+        </TabsContent>
 
         <TabsContent value="wishlist" className="mt-4">
           {character.wishlistItems.length === 0 ? (
