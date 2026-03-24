@@ -71,9 +71,6 @@ function GearSlot({ item, side }: { item: EquippedItem | undefined; side: "left"
       } ${isBottom ? "justify-center" : ""}`}
       data-wowhead={buildWowheadData(item)}
     >
-      <div className="shrink-0 w-9 h-9 rounded border border-white/10 bg-black/40 flex items-center justify-center overflow-hidden">
-        <span className="text-[10px] text-muted-foreground">{item.slot.name.slice(0, 4)}</span>
-      </div>
       <div className={`min-w-0 ${side === "right" ? "text-right" : ""}`}>
         <div className={`text-xs font-medium truncate max-w-[160px] ${colorClass}`}>
           {item.name}
