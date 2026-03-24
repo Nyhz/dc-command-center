@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm create:*)",
+      "Bash(printf \"No\\\\nYes\\\\n\")",
+      "Bash(yes)"
+    ]
+  }
+}
