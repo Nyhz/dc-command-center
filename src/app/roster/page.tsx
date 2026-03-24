@@ -27,12 +27,10 @@ export default async function RosterPage() {
             All guild members and their characters
           </p>
         </div>
-        {canManage && (
-          <div className="flex gap-2">
-            <SyncRosterButton />
-            <AddCharacterDialog />
-          </div>
-        )}
+        <div className="flex gap-2">
+          {canManage && <SyncRosterButton />}
+          <AddCharacterDialog />
+        </div>
       </div>
 
       <RosterTable characters={characters} canManage={canManage} />
