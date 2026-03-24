@@ -138,7 +138,7 @@ const FIGHT_TABLE_QUERY = `
     reportData {
       report(code: $code) {
         damageTable: table(dataType: DamageDone, fightIDs: $fightID, startTime: $start, endTime: $end)
-        healingTable: table(dataType: HealingDone, fightIDs: $fightID, startTime: $start, endTime: $end)
+        healingTable: table(dataType: Healing, fightIDs: $fightID, startTime: $start, endTime: $end)
       }
     }
   }
