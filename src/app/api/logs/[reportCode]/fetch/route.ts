@@ -56,10 +56,28 @@ export async function POST(
         fight.startTime,
         fight.endTime
       );
+
+      // Debug: log raw structure for first fight
+      if (fight === fights[0]) {
+        console.log("[WCL DEBUG] Fight:", fight.name, "ID:", fight.id);
+        console.log("[WCL DEBUG] damageTable keys:", JSON.stringify(Object.keys(tableData.reportData.report.damageTable ?? {})));
+        console.log("[WCL DEBUG] damageTable.data keys:", JSON.stringify(Object.keys((tableData.reportData.report.damageTable as Record<string, unknown>)?.data ?? {})));
+        const raw = tableData.reportData.report.damageTable;
+        console.log("[WCL DEBUG] damageTable sample:", JSON.stringify(raw).slice(0, 1000));
+      }
+
       damageEntries = tableData.reportData.report.damageTable?.data?.entries ?? [];
       healingEntries = tableData.reportData.report.healingTable?.data?.entries ?? [];
-    } catch {
-      // Skip this fight if table fetch fails
+
+      if (fight === fights[0]) {
+        console.log("[WCL DEBUG] damageEntries count:", damageEntries.length);
+        console.log("[WCL DEBUG] healingEntries count:", healingEntries.length);
+        if (damageEntries.length > 0) {
+          console.log("[WCL DEBUG] first entry:", JSON.stringify(damageEntries[0]));
+        }
+      }
+    } catch (err) {
+      console.error("[WCL ERROR] Fight fetch failed:", fight.name, err instanceof Error ? err.message : err);
       continue;
     }
 
@@ -94,6 +112,10 @@ export async function POST(
     }
 
     // Match to roster characters and upsert
+    if (fight === fights[0]) {
+      console.log("[WCL DEBUG] playerMap names:", [...playerMap.keys()]);
+      console.log("[WCL DEBUG] roster names:", allCharacters.map(c => c.name.toLowerCase()));
+    }
     for (const [playerName, data] of playerMap) {
       const dbChar = allCharacters.find(
         (c) => c.name.toLowerCase() === playerName
