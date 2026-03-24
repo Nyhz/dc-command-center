@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isRaidLeader } from "@/lib/auth-helpers";
-import { fetchReportMetadata, fetchReportRankings, type WCLRankedCharacter } from "@/lib/warcraft-logs";
+import { fetchReportMetadata, fetchFightTable, type WCLTableEntry } from "@/lib/warcraft-logs";
 
 export async function POST(
   _request: Request,
@@ -20,11 +20,10 @@ export async function POST(
     return NextResponse.json({ error: "Log not found" }, { status: 404 });
   }
 
-  // Fetch report metadata
+  // Step 1: Fetch report metadata (fights list)
   const metadata = await fetchReportMetadata(reportCode);
   const report = metadata.reportData.report;
 
-  // Update log with metadata
   await prisma.raidLog.update({
     where: { reportCode },
     data: {
@@ -36,34 +35,69 @@ export async function POST(
     },
   });
 
-  // Fetch rankings
-  const rankingsData = await fetchReportRankings(reportCode);
-  const rankings = rankingsData.reportData.report.rankings;
+  const fights = report.fights.filter((f) => f.kill && f.encounterID > 0);
 
-  if (!rankings?.data) {
-    return NextResponse.json({ fetched: 0, message: "No rankings data available" });
-  }
-
-  // Get all characters in the database for matching
+  // Step 2: Get all roster characters for matching
   const allCharacters = await prisma.character.findMany({
     select: { id: true, name: true, realm: true },
   });
 
   let performancesCreated = 0;
 
-  for (const fight of rankings.data) {
-    const allChars: (WCLRankedCharacter & { role: "dps" | "healer" | "tank" })[] = [
-      ...(fight.roles.dps?.characters ?? []).map((c) => ({ ...c, role: "dps" as const })),
-      ...(fight.roles.healers?.characters ?? []).map((c) => ({ ...c, role: "healer" as const })),
-      ...(fight.roles.tanks?.characters ?? []).map((c) => ({ ...c, role: "tank" as const })),
-    ];
+  // Step 3: Fetch DPS/HPS table for each fight
+  for (const fight of fights) {
+    let damageEntries: WCLTableEntry[] = [];
+    let healingEntries: WCLTableEntry[] = [];
 
-    for (const wclChar of allChars) {
-      // Match WCL character to database character by name (case-insensitive)
-      const dbChar = allCharacters.find(
-        (c) => c.name.toLowerCase() === wclChar.name.toLowerCase()
+    try {
+      const tableData = await fetchFightTable(
+        reportCode,
+        fight.id,
+        fight.startTime,
+        fight.endTime
       );
+      damageEntries = tableData.reportData.report.damageTable?.data?.entries ?? [];
+      healingEntries = tableData.reportData.report.healingTable?.data?.entries ?? [];
+    } catch {
+      // Skip this fight if table fetch fails
+      continue;
+    }
 
+    const duration = fight.endTime - fight.startTime;
+
+    // Build a map of player name → { dps, hps, spec }
+    const playerMap = new Map<string, { dps: number | null; hps: number | null; spec: string; className: string }>();
+
+    for (const entry of damageEntries) {
+      const dps = duration > 0 ? entry.total / (duration / 1000) : 0;
+      playerMap.set(entry.name.toLowerCase(), {
+        dps,
+        hps: null,
+        spec: entry.spec,
+        className: entry.type,
+      });
+    }
+
+    for (const entry of healingEntries) {
+      const hps = duration > 0 ? entry.total / (duration / 1000) : 0;
+      const existing = playerMap.get(entry.name.toLowerCase());
+      if (existing) {
+        existing.hps = hps;
+      } else {
+        playerMap.set(entry.name.toLowerCase(), {
+          dps: null,
+          hps,
+          spec: entry.spec,
+          className: entry.type,
+        });
+      }
+    }
+
+    // Match to roster characters and upsert
+    for (const [playerName, data] of playerMap) {
+      const dbChar = allCharacters.find(
+        (c) => c.name.toLowerCase() === playerName
+      );
       if (!dbChar) continue;
 
       await prisma.performance.upsert({
@@ -71,31 +105,31 @@ export async function POST(
           characterId_raidLogId_encounterId: {
             characterId: dbChar.id,
             raidLogId: log.id,
-            encounterId: fight.encounter.id,
+            encounterId: fight.encounterID,
           },
         },
         update: {
-          encounterName: fight.encounter.name,
+          encounterName: fight.name,
           difficulty: fight.difficulty,
-          dps: wclChar.role === "dps" || wclChar.role === "tank" ? wclChar.amount : null,
-          hps: wclChar.role === "healer" ? wclChar.amount : null,
-          deaths: wclChar.deaths,
-          rankPercent: wclChar.rankPercent,
-          duration: fight.duration,
-          spec: wclChar.spec,
+          dps: data.dps,
+          hps: data.hps,
+          deaths: 0,
+          rankPercent: null,
+          duration,
+          spec: data.spec,
         },
         create: {
           characterId: dbChar.id,
           raidLogId: log.id,
-          encounterName: fight.encounter.name,
-          encounterId: fight.encounter.id,
+          encounterName: fight.name,
+          encounterId: fight.encounterID,
           difficulty: fight.difficulty,
-          dps: wclChar.role === "dps" || wclChar.role === "tank" ? wclChar.amount : null,
-          hps: wclChar.role === "healer" ? wclChar.amount : null,
-          deaths: wclChar.deaths,
-          rankPercent: wclChar.rankPercent,
-          duration: fight.duration,
-          spec: wclChar.spec,
+          dps: data.dps,
+          hps: data.hps,
+          deaths: 0,
+          rankPercent: null,
+          duration,
+          spec: data.spec,
         },
       });
 
@@ -105,6 +139,6 @@ export async function POST(
 
   return NextResponse.json({
     fetched: performancesCreated,
-    fights: rankings.data.length,
+    fights: fights.length,
   });
 }

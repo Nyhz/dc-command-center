@@ -64,61 +64,51 @@ export async function wclGraphQL<T>(query: string, variables?: Record<string, un
   return json.data as T;
 }
 
-// Types for WCL responses
-export interface WCLReportData {
+// ─── Types ───
+
+export interface WCLFight {
+  id: number;
+  name: string;
+  encounterID: number;
+  difficulty: number;
+  kill: boolean;
+  startTime: number;
+  endTime: number;
+}
+
+export interface WCLTableEntry {
+  name: string;
+  id: number;
+  guid: number;
+  type: string;  // "Shaman", "Warrior", etc.
+  spec: string;  // "Restoration", "Arms", etc.
+  total: number; // total damage or healing
+  activeTime: number;
+  activeTimeReduced: number;
+}
+
+export interface WCLReportMetadata {
   reportData: {
     report: {
       title: string;
       startTime: number;
       endTime: number;
       zone: { name: string } | null;
-      fights: {
-        id: number;
-        name: string;
-        encounterID: number;
-        difficulty: number;
-        kill: boolean;
-        startTime: number;
-        endTime: number;
-      }[];
-      masterData: {
-        actors: {
-          id: number;
-          name: string;
-          type: string;
-          subType: string;
-          server: string;
-        }[];
-      };
-      rankings: {
-        data: {
-          fightID: number;
-          encounter: { id: number; name: string };
-          difficulty: number;
-          size: number;
-          duration: number;
-          roles: {
-            tanks: { characters: WCLRankedCharacter[] };
-            healers: { characters: WCLRankedCharacter[] };
-            dps: { characters: WCLRankedCharacter[] };
-          };
-        }[];
-      } | null;
+      fights: WCLFight[];
     };
   };
 }
 
-export interface WCLRankedCharacter {
-  id: number;
-  name: string;
-  server: { name: string };
-  class: string;
-  spec: string;
-  amount: number; // DPS or HPS
-  rankPercent: number;
-  bracketPercent: number;
-  deaths: number;
+export interface WCLFightTableData {
+  reportData: {
+    report: {
+      damageTable: { data: { entries: WCLTableEntry[] } } | null;
+      healingTable: { data: { entries: WCLTableEntry[] } } | null;
+    };
+  };
 }
+
+// ─── Queries ───
 
 const REPORT_QUERY = `
   query GetReport($code: String!) {
@@ -137,34 +127,34 @@ const REPORT_QUERY = `
           startTime
           endTime
         }
-        masterData {
-          actors(type: "Player") {
-            id
-            name
-            type
-            subType
-            server
-          }
-        }
       }
     }
   }
 `;
 
-const RANKINGS_QUERY = `
-  query GetReportRankings($code: String!) {
+// Per-fight query using aliases — gets DPS and HPS tables for a single fight
+const FIGHT_TABLE_QUERY = `
+  query GetFightTable($code: String!, $fightID: [Int]!, $start: Float!, $end: Float!) {
     reportData {
       report(code: $code) {
-        rankings(compare: Rankings)
+        damageTable: table(dataType: DamageDone, fightIDs: $fightID, startTime: $start, endTime: $end)
+        healingTable: table(dataType: HealingDone, fightIDs: $fightID, startTime: $start, endTime: $end)
       }
     }
   }
 `;
 
+// ─── API functions ───
+
 export async function fetchReportMetadata(code: string) {
-  return wclGraphQL<WCLReportData>(REPORT_QUERY, { code });
+  return wclGraphQL<WCLReportMetadata>(REPORT_QUERY, { code });
 }
 
-export async function fetchReportRankings(code: string) {
-  return wclGraphQL<WCLReportData>(RANKINGS_QUERY, { code });
+export async function fetchFightTable(code: string, fightID: number, startTime: number, endTime: number) {
+  return wclGraphQL<WCLFightTableData>(FIGHT_TABLE_QUERY, {
+    code,
+    fightID: [fightID],
+    start: startTime,
+    end: endTime,
+  });
 }
