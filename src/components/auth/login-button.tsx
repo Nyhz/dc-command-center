@@ -7,7 +7,7 @@ export function LoginButton() {
     <form
       action={async () => {
         "use server";
-        await signIn("battlenet", { redirectTo: "/dashboard" });
+        await signIn("battlenet", { redirectTo: "/guilds" });
       }}
     >
       <Button type="submit" size="lg" className="font-heading tracking-wide gap-2">
