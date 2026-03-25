@@ -11,19 +11,21 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useGuild } from "@/lib/guild-context";
 import { Trash2 } from "lucide-react";
 
 export function DeleteLogButton({ reportCode, title }: { reportCode: string; title: string }) {
   const router = useRouter();
+  const { guild } = useGuild();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
     setLoading(true);
-    await fetch(`/api/logs/${reportCode}`, { method: "DELETE" });
+    await fetch(`/api/g/${guild.slug}/logs/${reportCode}`, { method: "DELETE" });
     setOpen(false);
     setLoading(false);
-    router.push("/logs");
+    router.push(`/g/${guild.slug}/logs`);
     router.refresh();
   }
 

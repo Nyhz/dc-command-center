@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGuild } from "@/lib/guild-context";
 import Image from "next/image";
 
 interface EquippedItem {
@@ -92,6 +93,7 @@ function GearSlot({ item, side }: { item: EquippedItem | undefined; side: "left"
 }
 
 export function GearDisplay({ characterId }: { characterId: string }) {
+  const { guild } = useGuild();
   const [items, setItems] = useState<EquippedItem[]>([]);
   const [renderUrl, setRenderUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,7 +108,7 @@ export function GearDisplay({ characterId }: { characterId: string }) {
   }, []);
 
   useEffect(() => {
-    fetch(`/api/roster/${characterId}/equipment`)
+    fetch(`/api/g/${guild.slug}/roster/${characterId}/equipment`)
       .then((r) => {
         if (!r.ok) throw new Error("Failed to fetch gear");
         return r.json();

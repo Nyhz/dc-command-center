@@ -38,7 +38,7 @@ interface RosterCharacter {
 
 type SortKey = "name" | "className" | "raidRole" | "itemLevel";
 
-export function RosterTable({ characters, canManage = false }: { characters: RosterCharacter[]; canManage?: boolean }) {
+export function RosterTable({ characters, canManage = false, guildSlug }: { characters: RosterCharacter[]; canManage?: boolean; guildSlug?: string }) {
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState<string>("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -177,7 +177,7 @@ export function RosterTable({ characters, canManage = false }: { characters: Ros
                 <TableRow key={char.id} className="hover:bg-accent/50">
                   <TableCell>
                     <Link
-                      href={`/roster/${char.id}`}
+                      href={guildSlug ? `/g/${guildSlug}/roster/${char.id}` : `/roster/${char.id}`}
                       className="flex items-center gap-2 font-medium hover:text-primary"
                     >
                       <ClassIcon className={char.className} />

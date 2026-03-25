@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ClassIcon } from "@/components/shared/class-icon";
+import { useGuild } from "@/lib/guild-context";
 import { Check, X, HelpCircle } from "lucide-react";
 
 interface AttendanceToggleProps {
@@ -14,11 +15,12 @@ interface AttendanceToggleProps {
 
 export function AttendanceToggle({ eventId, characters, existingAttendances }: AttendanceToggleProps) {
   const router = useRouter();
+  const { guild } = useGuild();
   const [loading, setLoading] = useState<string | null>(null);
 
   async function setAttendance(characterId: string, status: string) {
     setLoading(characterId);
-    await fetch(`/api/calendar/${eventId}/attendance`, {
+    await fetch(`/api/g/${guild.slug}/calendar/${eventId}/attendance`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ characterId, status }),

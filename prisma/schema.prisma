@@ -44,7 +44,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ─── Application models ───
+// ─── Enums ───
 
 enum GuildRole {
   GUILD_MASTER
@@ -65,6 +65,55 @@ enum AttendanceStatus {
   TENTATIVE
 }
 
+// ─── Guild models ───
+
+model Guild {
+  id        String   @id @default(cuid())
+  name      String
+  realm     String
+  region    String   @default("eu")
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members    GuildMember[]
+  characters Character[]
+  raidEvents RaidEvent[]
+  raidLogs   RaidLog[]
+  invites    GuildInvite[]
+
+  @@unique([name, realm, region])
+}
+
+model GuildMember {
+  id        String    @id @default(cuid())
+  userId    String
+  guildId   String
+  role      GuildRole @default(MEMBER)
+  joinedAt  DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, guildId])
+}
+
+model GuildInvite {
+  id        String    @id @default(cuid())
+  guildId   String
+  code      String    @unique
+  createdBy String
+  expiresAt DateTime?
+  maxUses   Int?
+  uses      Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+// ─── User model ───
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -72,14 +121,16 @@ model User {
   emailVerified DateTime?
   image         String?
   battleTag     String?   @unique
-  guildRole     GuildRole @default(MEMBER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts   Account[]
-  sessions   Session[]
-  characters Character[]
+  accounts         Account[]
+  sessions         Session[]
+  characters       Character[]
+  guildMemberships GuildMember[]
 }
+
+// ─── Character model ───
 
 model Character {
   id         String   @id @default(cuid())
@@ -95,16 +146,20 @@ model Character {
   isMain     Boolean  @default(false)
   blizzardId Int?
   userId     String
+  guildId    String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guild         Guild          @relation(fields: [guildId], references: [id], onDelete: Cascade)
   wishlistItems WishlistItem[]
   attendances   Attendance[]
   performances  Performance[]
 
-  @@unique([name, realm, region])
+  @@unique([name, realm, region, guildId])
 }
+
+// ─── Wishlist ───
 
 model WishlistItem {
   id          String   @id @default(cuid())
@@ -127,6 +182,8 @@ model WishlistItem {
   @@unique([characterId, itemId])
 }
 
+// ─── Raid Events & Attendance ───
+
 model RaidEvent {
   id          String   @id @default(cuid())
   title       String
@@ -136,9 +193,11 @@ model RaidEvent {
   startTime   DateTime
   endTime     DateTime
   createdById String
+  guildId     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  guild       Guild        @relation(fields: [guildId], references: [id], onDelete: Cascade)
   attendances Attendance[]
   raidLogs    RaidLog[]
 }
@@ -158,20 +217,26 @@ model Attendance {
   @@unique([characterId, raidEventId])
 }
 
+// ─── Raid Logs & Performance ───
+
 model RaidLog {
   id          String    @id @default(cuid())
-  reportCode  String    @unique
+  reportCode  String
   title       String?
   raidName    String?
   startTime   DateTime?
   endTime     DateTime?
   raidEventId String?
+  guildId     String
   fetchedAt   DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  guild        Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade)
   raidEvent    RaidEvent?    @relation(fields: [raidEventId], references: [id], onDelete: SetNull)
   performances Performance[]
+
+  @@unique([reportCode, guildId])
 }
 
 model Performance {

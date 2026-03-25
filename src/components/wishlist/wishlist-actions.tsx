@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useGuild } from "@/lib/guild-context";
 import { Check, Trash2 } from "lucide-react";
 
 export function WishlistActions({
@@ -14,9 +15,10 @@ export function WishlistActions({
   obtained: boolean;
 }) {
   const router = useRouter();
+  const { guild } = useGuild();
 
   async function toggleObtained() {
-    await fetch(`/api/wishlist/${characterId}/${itemId}`, {
+    await fetch(`/api/g/${guild.slug}/wishlist/${characterId}/${itemId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ obtained: !obtained }),
@@ -25,7 +27,7 @@ export function WishlistActions({
   }
 
   async function remove() {
-    await fetch(`/api/wishlist/${characterId}/${itemId}`, { method: "DELETE" });
+    await fetch(`/api/g/${guild.slug}/wishlist/${characterId}/${itemId}`, { method: "DELETE" });
     router.refresh();
   }
 

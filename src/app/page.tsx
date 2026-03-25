@@ -43,7 +43,7 @@ export default function HomePage() {
         </p>
 
         <div className="flex gap-4">
-          <Link href="/dashboard">
+          <Link href="/guilds">
             <Button size="lg" className="font-heading tracking-wide">
               Enter Command Center
             </Button>

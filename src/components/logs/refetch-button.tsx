@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useGuild } from "@/lib/guild-context";
 import { RefreshCw } from "lucide-react";
 
 export function RefetchButton({ reportCode }: { reportCode: string }) {
   const router = useRouter();
+  const { guild } = useGuild();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
@@ -15,7 +17,7 @@ export function RefetchButton({ reportCode }: { reportCode: string }) {
     setResult(null);
 
     try {
-      const res = await fetch(`/api/logs/${reportCode}/fetch`, { method: "POST" });
+      const res = await fetch(`/api/g/${guild.slug}/logs/${reportCode}/fetch`, { method: "POST" });
       const data = await res.json();
 
       if (!res.ok) {

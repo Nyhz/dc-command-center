@@ -21,10 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGuild } from "@/lib/guild-context";
 import { Plus } from "lucide-react";
 
 export function AddItemDialog({ characterId }: { characterId: string }) {
   const router = useRouter();
+  const { guild } = useGuild();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [itemId, setItemId] = useState("");
@@ -39,7 +41,7 @@ export function AddItemDialog({ characterId }: { characterId: string }) {
     e.preventDefault();
     setLoading(true);
 
-    const res = await fetch(`/api/wishlist/${characterId}`, {
+    const res = await fetch(`/api/g/${guild.slug}/wishlist/${characterId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

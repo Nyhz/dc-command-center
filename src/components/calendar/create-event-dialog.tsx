@@ -22,10 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DIFFICULTIES } from "@/lib/constants";
+import { useGuild } from "@/lib/guild-context";
 import { Plus } from "lucide-react";
 
 export function CreateEventDialog() {
   const router = useRouter();
+  const { guild } = useGuild();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
@@ -39,7 +41,7 @@ export function CreateEventDialog() {
     e.preventDefault();
     setLoading(true);
 
-    const res = await fetch("/api/calendar", {
+    const res = await fetch(`/api/g/${guild.slug}/calendar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, raidName, difficulty, description, startTime, endTime }),

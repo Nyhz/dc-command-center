@@ -13,10 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useGuild } from "@/lib/guild-context";
 import { Plus } from "lucide-react";
 
 export function LinkLogDialog() {
   const router = useRouter();
+  const { guild } = useGuild();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [reportCode, setReportCode] = useState("");
@@ -28,7 +30,7 @@ export function LinkLogDialog() {
     setError("");
 
     // Step 1: Link the log
-    const linkRes = await fetch("/api/logs", {
+    const linkRes = await fetch(`/api/g/${guild.slug}/logs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reportCode }),
@@ -45,7 +47,7 @@ export function LinkLogDialog() {
 
     // Step 2: Fetch data from WCL
     try {
-      await fetch(`/api/logs/${log.reportCode}/fetch`, { method: "POST" });
+      await fetch(`/api/g/${guild.slug}/logs/${log.reportCode}/fetch`, { method: "POST" });
     } catch {
       // Non-critical — data can be fetched later
     }

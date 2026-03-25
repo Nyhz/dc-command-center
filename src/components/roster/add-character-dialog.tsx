@@ -21,10 +21,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { WOW_CLASSES, CLASS_SPECS, RAID_ROLES } from "@/lib/constants";
+import { useGuild } from "@/lib/guild-context";
 import { Plus } from "lucide-react";
 
 export function AddCharacterDialog() {
   const router = useRouter();
+  const { guild } = useGuild();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
@@ -41,7 +43,7 @@ export function AddCharacterDialog() {
     e.preventDefault();
     setLoading(true);
 
-    const res = await fetch("/api/roster", {
+    const res = await fetch(`/api/g/${guild.slug}/roster`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

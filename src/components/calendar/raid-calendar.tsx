@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useGuild } from "@/lib/guild-context";
 import Link from "next/link";
 
 interface RaidEventData {
@@ -22,6 +23,7 @@ interface RaidEventData {
 }
 
 export function RaidCalendar() {
+  const { guild } = useGuild();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<RaidEventData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,14 +31,14 @@ export function RaidCalendar() {
   useEffect(() => {
     const month = format(currentDate, "yyyy-MM");
     setLoading(true);
-    fetch(`/api/calendar?month=${month}`)
+    fetch(`/api/g/${guild.slug}/calendar?month=${month}`)
       .then((r) => r.json())
       .then((data) => {
         setEvents(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [currentDate]);
+  }, [currentDate, guild.slug]);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -116,7 +118,7 @@ export function RaidCalendar() {
                   {dayEvents.map((event) => {
                     const attending = event.attendances.filter((a) => a.status === "ATTENDING").length;
                     return (
-                      <Link key={event.id} href={`/calendar/${event.id}`}>
+                      <Link key={event.id} href={`/g/${guild.slug}/calendar/${event.id}`}>
                         <div className="mt-0.5 cursor-pointer rounded bg-accent/50 px-1 py-0.5 text-xs hover:bg-accent">
                           <div className="truncate font-medium">{event.title}</div>
                           <div className="flex items-center gap-1">
