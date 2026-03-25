@@ -48,7 +48,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         pathname.startsWith("/invite");
 
       if (isProtected && !isLoggedIn) {
-        return Response.redirect(new URL("/login", request.nextUrl.origin));
+        const callbackUrl = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
+        return Response.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, request.nextUrl.origin));
       }
 
       return true;

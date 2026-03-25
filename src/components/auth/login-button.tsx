@@ -2,12 +2,12 @@ import { signIn } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 
-export function LoginButton() {
+export function LoginButton({ callbackUrl }: { callbackUrl?: string }) {
   return (
     <form
       action={async () => {
         "use server";
-        await signIn("battlenet", { redirectTo: "/guilds" });
+        await signIn("battlenet", { redirectTo: callbackUrl || "/guilds" });
       }}
     >
       <Button type="submit" size="lg" className="font-heading tracking-wide gap-2">

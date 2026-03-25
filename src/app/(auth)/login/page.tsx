@@ -1,7 +1,13 @@
 import { Shield } from "lucide-react";
 import { LoginButton } from "@/components/auth/login-button";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+}) {
+  const { callbackUrl, error } = await searchParams;
+
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center px-4">
       <div className="flex flex-col items-center gap-6 text-center">
@@ -13,7 +19,12 @@ export default function LoginPage() {
           Sign in with your Battle.net account to access your guild&apos;s
           command center.
         </p>
-        <LoginButton />
+        {error && (
+          <p className="text-sm text-destructive">
+            Authentication error. Please try again.
+          </p>
+        )}
+        <LoginButton callbackUrl={callbackUrl} />
       </div>
     </div>
   );
